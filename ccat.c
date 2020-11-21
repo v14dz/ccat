@@ -35,7 +35,7 @@
 
 #include "colors.h"
 
-#define VERSION "1.0b"
+#define VERSION "1.1"
 #define MAX_MATCH_PER_LINE 255
 
 #define fatal(...) { \
