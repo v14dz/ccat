@@ -32,9 +32,8 @@ After this, the ``ccat`` binary will be placed under the
 
 Usage is obtained with the ``-h`` option:
 
-    usage: ./ccat [options] [color1 pattern1] [[color2 pattern2] ...] [filename]
+    usage: ./ccat [options] [color1[:decoration1] pattern1] [[color2[:decoration2] pattern2] ...] [filename]
 
-      -b|--bold            Use bold for matching patterns
       -c|--config <cfg>    Use configuration file
       -g|--group           Only colorize sub matches (use parentheses)
       -h|--help            Display this help
@@ -42,15 +41,16 @@ Usage is obtained with the ``-h`` option:
       -v|--version         Display current version
 
     Possible colors are: black red green brown blue magenta cyan white
+    Possible decorations are: 'b' (bold) 'i' (italic) or 'u' (underline)
 
 A pattern in Ccat is a [POSIX extended regular expression](https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002dextended-regular-expression-syntax.html).
 
 ## Some examples
 
 Colorizes the ``/etc/passwd`` file to have the *root* string in red and
-default shells in *green*:
+default shells in *green* and underlined:
 
-    ccat -b red 'root' green ':[^:]+$' /etc/passwd
+    ccat red 'root' green:u ':[^:]+$' /etc/passwd
 
 Colorizes an input string (received from *stdin*):
 
@@ -59,19 +59,20 @@ Colorizes an input string (received from *stdin*):
 
 Only colorizes sub matches fields (with ``-g``):
 
-    echo "xxxxxx" | ccat -gb green '(.).(.).(.).' cyan '.(.).(.).(.)'
+    echo "xxxxxx" | ccat -g green '(.).(.).(.).' cyan '.(.).(.).(.)'
 
-Colorizes simple patterns (one per line only) with sub matches option:
+Colorizes simple patterns (one per line only) with sub matches option and
+show them on bold:
 
-    ccat -g red '(root|error)' /var/log/kern.log
+    ccat -g red:b '(root|error)' /var/log/kern.log
 
-Colorizes a system log file (``/var/log/messages``) and highlight critical
-keywords:
+Colorizes a system log file (``/var/log/messages``) and highlight in bold
+critical keywords:
 
-    ccat -g green '^(.*\s\w{2}:\w{2}:\w{2})\s\S+\s+\S+: .*$' \
-            blue  '^.*\s\w{2}:\w{2}:\w{2}\s(\S+)\s+\S+: .*$' \
-            cyan  '^.*\s\w{2}:\w{2}:\w{2}\s\S+\s+(\S+): .*$' \
-            red   '(error|failed|corrupt)' \
+    ccat -g green  '^(.*\s\w{2}:\w{2}:\w{2})\s\S+\s+\S+: .*$' \
+            blue   '^.*\s\w{2}:\w{2}:\w{2}\s(\S+)\s+\S+: .*$' \
+            cyan   '^.*\s\w{2}:\w{2}:\w{2}\s\S+\s+(\S+): .*$' \
+            red:b  '(error|failed|corrupt)' \
             /var/log/messages
 
 Colorizes the output of an hex dump and highlight a specific byte value:
@@ -87,17 +88,17 @@ and display the file ``/var/log/messages``:
 
     # Configuration file to display message with ccat.
     filename   /var/log/messages
-    flags      gb
+    flags      g
     # Colors
     green      ^(.*\s\w{2}:\w{2}:\w{2})\s\S+\s+\S+: .*$
     blue       ^.*\s\w{2}:\w{2}:\w{2}\s(\S+)\s+\S+: .*$
     cyan       ^.*\s\w{2}:\w{2}:\w{2}\s\S+\s+(\S+): .*$
-    red        (error|failed|corrupt)
+    red:b      (error|failed|corrupt)
 
 Note that *flags* key may contains any letter that matches a flag option
-(i.e. **b** for bold, **g** for group, **t** for html and so on).  This
-configuration file will produce the same output of the command show
-previously if invoked with:
+(i.e. **g** for group, **t** for html and so on).  This configuration file
+will produce the same output of the command show previously if invoked
+with:
 
     ccat -c ./messages.cfg
 

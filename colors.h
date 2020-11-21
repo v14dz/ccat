@@ -26,6 +26,7 @@
 #ifndef _COLORS_H
 #define _COLORS_H
 
+#include <stdlib.h>
 #include <stdbool.h>
 
 /* output format. */
@@ -42,31 +43,53 @@
 #define cyan         36
 #define white        37
 
-#define cprint_escseq(color, bold, fmt, msg) { \
-        if (bold) \
-            printf("\e[1;%dm" fmt "\e[0m", color, msg); \
+/* Decorations. */
+#define DECO_BOLD          1
+#define DECO_ITALIC        3
+#define DECO_UNDERLINE     4
+
+#define cprint_escseq(color, style, fmt, msg) { \
+        if (style) \
+            printf("\e[%d;%dm" fmt "\e[0m", style, color, msg); \
         else \
             printf("\e[%dm" fmt "\e[0m", color, msg); \
     }
 
-#define cprint_html(color, bold, fmt, msg) { \
-        if (bold) \
+#define cprint_html(color, style, fmt, msg) { \
+        if (style == DECO_BOLD) \
             printf("<font color=\"%s\"><b>" fmt "</b></font>", color, msg); \
+        else if (style == DECO_ITALIC) \
+            printf("<font color=\"%s\"><i>" fmt "</i></font>", color, msg); \
+        else if (style == DECO_UNDERLINE) \
+            printf("<font color=\"%s\"><u>" fmt "</u></font>", color, msg); \
         else \
             printf("<font color=\"%s\">" fmt "</font>", color, msg); \
     }
 
 #define color_func(col) \
-    void col##_pr_escseq(char *str, bool bold) { \
-        cprint_escseq(col, bold, "%s", str); \
+    void col##_pr_escseq(char *str, int style) { \
+        cprint_escseq(col, style, "%s", str); \
     } \
-    void col##_pr_html(char *str, bool bold) { \
-        cprint_html(#col, bold, "%s", str); \
+    void col##_pr_html(char *str, int style) { \
+        cprint_html(#col, style, "%s", str); \
     }
 
 #define colfn_entry(col) { #col , col##_pr_escseq, col##_pr_html }
 
-extern bool is_color_valid(char *);
-extern void cprint(char *, int, bool, char *);
+#define xfree(p) { \
+        if (p) { \
+            free(p); \
+            p = NULL; \
+        } \
+    }
+
+typedef struct {
+    char *color;
+    char *decoration;
+} style_t;
+
+extern bool is_style_valid(char *, style_t *);
+extern void cprint(char *, int, int, char *);
+extern int decoration_num(char *);
 
 #endif

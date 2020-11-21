@@ -39,8 +39,8 @@ color_func(white);
 
 struct colfn_st {
     char *color;
-    void (*pr_escseq)(char *, bool bold);
-    void (*pr_html)(char *, bool bold);
+    void (*pr_escseq)(char *, int);
+    void (*pr_html)(char *, int);
 } col_fn[] = {
     colfn_entry(black),
     colfn_entry(red),
@@ -53,29 +53,73 @@ struct colfn_st {
     { NULL, NULL },
 };
 
-bool is_color_valid(char *col) {
-    char *cur_color[] = { "black", "red", "green", "brown", "blue",
-                          "magenta", "cyan", "white", NULL};
+/* A style has the form "color[:deco]", some examples: "blue:b",
+   "white:i".
+*/
+bool is_style_valid(char *style_str, style_t *s) {
+    char *valid_colors[] = { "black", "red", "green", "brown", "blue",
+                             "magenta", "cyan", "white", NULL };
+    char *valid_decos[] = { "b", "i", "u", NULL };
+    char *color = NULL;
+    char *deco = NULL;
     char **ptr;
+    int found = 0;
+    bool ret = false;
 
-    for(ptr = cur_color; *ptr; ptr++)
-        if (strcmp(*ptr, col) == 0)
-            return true;
+    sscanf(style_str, "%m[^: ]:%ms", &color, &deco);
 
-    return false;
+    if(deco) {
+        for(ptr = valid_decos; *ptr; ptr++)
+            if (strcmp(*ptr, deco) == 0) {
+                s->decoration = *ptr;
+                found = 1;
+                break;
+            }
+
+        if (found == 0) {
+            goto out;
+        }
+    }
+
+    for(ptr = valid_colors; *ptr; ptr++)
+        if (strcmp(*ptr, color) == 0) {
+            s->color= *ptr;
+            ret = true;
+            goto out;
+        }
+
+out:
+    xfree(deco);
+    xfree(color);
+    return ret;
 }
 
-void cprint(char *col, int style, bool bold, char *msg) {
+int decoration_num(char *deco_str) {
+
+    if (! deco_str)
+        return 0;
+
+    if (strcmp(deco_str, "u") == 0)
+        return DECO_UNDERLINE;
+    if (strcmp(deco_str, "b") == 0)
+        return DECO_BOLD;
+    if (strcmp(deco_str, "i") == 0)
+        return DECO_ITALIC;
+
+    return -1;
+}
+
+void cprint(char *col, int output_type, int deco, char *msg) {
     struct colfn_st *p = NULL;
 
     for (p = &col_fn[0]; p->color != NULL; p++)
         if (strcmp(p->color, col) == 0) {
-            switch (style) {
+            switch (output_type) {
             case OUT_ESQSEC:
-                p->pr_escseq(msg, bold);
+                p->pr_escseq(msg, deco);
                 break;
             case OUT_HTML:
-                p->pr_html(msg, bold);
+                p->pr_html(msg, deco);
                 break;
             default:
                 break;
