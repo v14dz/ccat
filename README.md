@@ -26,7 +26,7 @@ Download, compile and install with:
     sudo make install
 
 After this, the ``ccat`` binary will be placed under the
-``/usr/include/bin/`` directory.
+``/usr/local/bin/`` directory.
 
 ## Usage
 
@@ -116,5 +116,12 @@ To save a colored output to an HTML file:
 
     ccat --html -c ./messages.cfg > /tmp/messages.html
 
-More configuration files can be found in the [configs](./configs/)
-directory.
+Configuration files shipped with the sources (i.e. those in the
+[configs](./configs/) directory) are copied under the
+``/usr/local/etc/ccat/`` directory.  To store your own configuration file,
+place them in ``~/.config/ccat/`` (and keep the ``*.cfg`` extension).  Once
+a configuration file are place either in the system directory
+(``/usr/local/etc/ccat/``) or in a user (``~/.config/ccat/``), it can be
+used only by specifying it's name, for instance:
+
+    ccat -c messages /var/log/messages.1
