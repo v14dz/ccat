@@ -75,8 +75,8 @@ static void usage(const char *, int);
 static void style_node_add(style_node_t **, style_t *, char *);
 static void show_version(void);
 static void load_config(char *);
-static void match_node_add(match_node_t **, style_node_t *, size_t, regmatch_t *);
-
+static void match_node_add(match_node_t **, style_node_t *, size_t,
+                           regmatch_t *);
 
 static void show_version(void) {
     fprintf(stdout, "%s\n", VERSION);
@@ -99,7 +99,7 @@ static void usage(const char *progname, const int exit_status) {
     exit(exit_status);
 }
 
-static void style_node_add(style_node_t ** head, style_t *style,
+static void style_node_add(style_node_t ** head, style_t * style,
                            char *pattern) {
     style_node_t *p = NULL;
     style_node_t *new = NULL;
@@ -124,7 +124,7 @@ static void style_node_add(style_node_t ** head, style_t *style,
     }
 }
 
-static void match_node_add(match_node_t ** head, style_node_t *style_node,
+static void match_node_add(match_node_t ** head, style_node_t * style_node,
                            size_t nmatch, regmatch_t * match) {
     match_node_t *p = NULL;
     match_node_t *new = NULL;
@@ -210,8 +210,9 @@ static void parse_options(int argc, char **argv) {
         if (argv[i + 1]) {
             style.color = NULL;
             style.decoration = NULL;
-            if(is_style_valid(argv[i], &style))
-                style_node_add(&g_opt.style_node_head, &style, argv[i + 1]);
+            if (is_style_valid(argv[i], &style))
+                style_node_add(&g_opt.style_node_head, &style,
+                               argv[i + 1]);
             i += 2;
         } else
             break;
@@ -265,7 +266,8 @@ static void colorize_line(char *line, ssize_t len,
                     strncpy(tmpbuf, ptr, match_len);
 
                     /* print with color! */
-                    cprint(cur_match->style_node->color, g_opt.output,
+                    cprint(cur_match->style_node->color,
+                           g_opt.output,
                            cur_match->style_node->decoration, tmpbuf);
                     xfree(tmpbuf);
 
@@ -305,10 +307,10 @@ static match_node_t *process_line(char *line, size_t len) {
 
             if (g_opt.group) {
 
-                if (regexec(&preg, line, MAX_MATCH_PER_LINE, match, eflags)
-                    == 0)
-                    match_node_add(&match_node_head, p, MAX_MATCH_PER_LINE,
-                                   match);
+                if (regexec
+                    (&preg, line, MAX_MATCH_PER_LINE, match, eflags) == 0)
+                    match_node_add(&match_node_head, p,
+                                   MAX_MATCH_PER_LINE, match);
 
             } else {
 
@@ -328,8 +330,8 @@ static match_node_t *process_line(char *line, size_t len) {
                 }
 
                 if (match_num > 0)
-                    match_node_add(&match_node_head, p, MAX_MATCH_PER_LINE,
-                                   match);
+                    match_node_add(&match_node_head, p,
+                                   MAX_MATCH_PER_LINE, match);
             }
 
             regfree(&preg);
@@ -379,7 +381,7 @@ static void load_config(char *config_file) {
             v = strdup(value);
             style.color = NULL;
             style.decoration = NULL;
-            if(is_style_valid(k, &style))
+            if (is_style_valid(k, &style))
                 style_node_add(&g_opt.style_node_head, &style, v);
         }
 

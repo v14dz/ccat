@@ -56,9 +56,10 @@ struct colfn_st {
 /* A style has the form "color[:deco]", some examples: "blue:b",
    "white:i".
 */
-bool is_style_valid(char *style_str, style_t *s) {
+bool is_style_valid(char *style_str, style_t * s) {
     char *valid_colors[] = { "black", "red", "green", "brown", "blue",
-                             "magenta", "cyan", "white", NULL };
+        "magenta", "cyan", "white", NULL
+    };
     char *valid_decos[] = { "b", "i", "u", NULL };
     char *color = NULL;
     char *deco = NULL;
@@ -68,8 +69,8 @@ bool is_style_valid(char *style_str, style_t *s) {
 
     sscanf(style_str, "%m[^: ]:%ms", &color, &deco);
 
-    if(deco) {
-        for(ptr = valid_decos; *ptr; ptr++)
+    if (deco) {
+        for (ptr = valid_decos; *ptr; ptr++)
             if (strcmp(*ptr, deco) == 0) {
                 s->decoration = *ptr;
                 found = 1;
@@ -81,14 +82,14 @@ bool is_style_valid(char *style_str, style_t *s) {
         }
     }
 
-    for(ptr = valid_colors; *ptr; ptr++)
+    for (ptr = valid_colors; *ptr; ptr++)
         if (strcmp(*ptr, color) == 0) {
-            s->color= *ptr;
+            s->color = *ptr;
             ret = true;
             goto out;
         }
 
-out:
+  out:
     xfree(deco);
     xfree(color);
     return ret;
@@ -96,7 +97,7 @@ out:
 
 int decoration_num(char *deco_str) {
 
-    if (! deco_str)
+    if (!deco_str)
         return 0;
 
     if (strcmp(deco_str, "u") == 0)
