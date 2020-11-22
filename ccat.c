@@ -32,6 +32,11 @@
 #include <sys/types.h>
 #include <regex.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <pwd.h>
+#include <limits.h>
+#include <stdlib.h>
 
 #include "colors.h"
 
@@ -343,6 +348,26 @@ static match_node_t *process_line(char *line, size_t len) {
     return match_node_head;
 }
 
+static FILE *open_alternate_file(char *filename) {
+    FILE *fp = NULL;
+    char file[PATH_MAX];
+    struct passwd *pw = NULL;
+
+    pw = getpwuid(getuid());
+
+    snprintf(file, sizeof(file), "%s/.config/ccat/%s.cfg", pw->pw_dir, filename);
+
+    if ((fp = fopen(file, "r")))
+        goto out;
+
+    snprintf(file, sizeof(file), "/usr/local/etc/ccat/%s.cfg", filename);
+
+    fp = fopen(file, "r");
+
+out:
+    return fp;
+}
+
 static void load_config(char *config_file) {
     char line[1024];
     char *key = NULL;
@@ -353,6 +378,9 @@ static void load_config(char *config_file) {
     style_t style;
 
     fp = fopen(config_file, "r");
+
+    if (!fp)
+        fp = open_alternate_file(config_file);
 
     if (!fp)
         fatal("Error: can't fopen() configuration file.\n");
