@@ -28,6 +28,15 @@
 
 #include "colors.h"
 
+#define COLORS { \
+    "black", "red", "green", "brown", "blue", \
+    "magenta", "cyan", "white", NULL \
+}
+
+#define DECORATIONS { \
+    "bold", "italic", "underline", NULL \
+}
+
 color_func(black);
 color_func(red);
 color_func(green);
@@ -53,36 +62,37 @@ struct colfn_st {
     { NULL, NULL },
 };
 
-/* A style has the form "color[:deco]", some examples: "blue:b",
-   "white:i".
+static int start_with(char *, char *);
+
+/* Check a style string.  This has the form "color[:deco]" (for instance:
+ * "blue:b", "blue:bold", "white:i", "white:it", etc.).  It splits color
+ * and decoration to set the structure s.  Return true if the
+ * style is valid.
 */
-bool is_style_valid(char *style_str, style_t * s) {
-    char *valid_colors[] = { "black", "red", "green", "brown", "blue",
-        "magenta", "cyan", "white", NULL
-    };
-    char *valid_decos[] = { "b", "i", "u", NULL };
-    char *color = NULL;
-    char *deco = NULL;
-    char **ptr;
-    int found = 0;
+bool is_style_valid(char *style, style_t * s) {
+    char *color_names[] = COLORS;
+    char *deco_names[] = DECORATIONS;
+    char *color = NULL, *deco = NULL, **ptr;
+    int success = 0;
     bool ret = false;
 
-    sscanf(style_str, "%m[^: ]:%ms", &color, &deco);
+    sscanf(style, "%m[^: ]:%ms", &color, &deco);
 
     if (deco) {
-        for (ptr = valid_decos; *ptr; ptr++)
-            if (strcmp(*ptr, deco) == 0) {
+        for (ptr = deco_names; *ptr; ptr++)
+            if (start_with(*ptr, deco) == 0) {
                 s->decoration = *ptr;
-                found = 1;
+                success = 1;
                 break;
             }
 
-        if (found == 0) {
+        /* specified deco isn't the list. */
+        if (success == 0) {
             goto out;
         }
     }
 
-    for (ptr = valid_colors; *ptr; ptr++)
+    for (ptr = color_names; *ptr; ptr++)
         if (strcmp(*ptr, color) == 0) {
             s->color = *ptr;
             ret = true;
@@ -92,7 +102,15 @@ bool is_style_valid(char *style_str, style_t * s) {
   out:
     xfree(deco);
     xfree(color);
+
     return ret;
+}
+
+static int start_with(char *s1, char *s2) {
+    if (strlen(s2) > strlen(s1))
+        return -1;
+
+    return strncmp(s1, s2, strlen(s2));
 }
 
 int decoration_num(char *deco_str) {
@@ -100,11 +118,11 @@ int decoration_num(char *deco_str) {
     if (!deco_str)
         return 0;
 
-    if (strcmp(deco_str, "u") == 0)
+    if (start_with("underline", deco_str) == 0)
         return DECO_UNDERLINE;
-    if (strcmp(deco_str, "b") == 0)
+    if (start_with("bold", deco_str) == 0)
         return DECO_BOLD;
-    if (strcmp(deco_str, "i") == 0)
+    if (start_with("italic", deco_str) == 0)
         return DECO_ITALIC;
 
     return -1;
