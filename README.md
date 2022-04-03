@@ -8,7 +8,7 @@ your files and command outputs.  To achieve this, it surrounds patterns
 with [ANSI escape sequences](https://en.wikipedia.org/wiki/ANSI_escape_code).
 Better than a long speech, watch the video below!
 
-[![asciicast](https://asciinema.org/a/DI0e612jZcNKz0nK1lNFf7S6S.svg)](https://asciinema.org/a/DI0e612jZcNKz0nK1lNFf7S6S)
+[![asciicast](https://asciinema.org/a/tqHhoQ6Z8eQEhHRnMdjWcHd04.svg)](https://asciinema.org/a/tqHhoQ6Z8eQEhHRnMdjWcHd04)
 
 
 ## Features
@@ -26,12 +26,12 @@ Current features (version 1.1):
 
 Download, compile and install with:
 
-    git clone --depth https://github.com/v14dz/ccat
+    git clone --depth 1 https://github.com/v14dz/ccat
     cd ccat
     make
     sudo make install
 
-After the `make install` command, the `ccat` binary will be placed under the
+After the `make install` command, the `ccat` is placed under the
 `/usr/local/bin/` directory.
 
 
